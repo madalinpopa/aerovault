@@ -1,6 +1,6 @@
 # AeroVault
 
-**AeroVault** is a CLI tool designed to easily backup, restore, and sync Docker volumes to popular cloud storage services like AWS and Azure. With future plans to include features like volume restoration and syncing, AeroVault simplifies the process of managing container volume backups in the cloud.
+**AeroVault** is a CLI tool designed to easily back up, restore, and sync Docker volumes to popular cloud storage services like AWS and Azure. With plans to include features like volume restoration and syncing, AeroVault simplifies the process of managing container volume backups in the cloud.
 
 ## Features
 
