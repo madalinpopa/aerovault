@@ -4,7 +4,7 @@
 
 ## Features
 
-- [x] **Backup**: Create backups of Docker container volumes and upload them to cloud storage.
+- [x] **Backup**: Create backups of Docker container volumes.
 - [ ] **Restore**: Restore Docker container volumes from backups.
 - [ ] **Cloud Provider Support**: Backup to multiple cloud providers, including Azure and AWS.
   - [ ] **Azure Storage Account**
