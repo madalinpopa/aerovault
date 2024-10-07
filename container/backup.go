@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -38,13 +40,11 @@ func (bm *BackupManager) BackupVolume(container, volume, outputPath string) erro
 
 // createBackupContainer creates a backup of the specified volume by creating a Docker container to tar its contents.
 func (bm *BackupManager) createBackupContainer(volumeFrom, volumeName, destinationPath, hostPath string) error {
-	backupName := fmt.Sprintf(backupTmpl, volumeName, time.Now().Unix())
-	cmd := generateTarCommand(backupName, destinationPath)
+	cmd := generateTarCommand(volumeName, destinationPath)
 
-	config := &container.Config{
-		Image: image,
-		Tty:   false,
-		Cmd:   []string{"sh", "-c", cmd},
+	config, err := createContainerConfig(image, cmd)
+	if err != nil {
+		return err
 	}
 
 	hostConfig := &container.HostConfig{
@@ -83,6 +83,40 @@ func (bm *BackupManager) getMountPoint(containerName, volumeName string) (types.
 	return types.MountPoint{}, fmt.Errorf("no mount found for volume %s", volumeName)
 }
 
-func generateTarCommand(backupName, destinationPath string) string {
+// nowFunc returns the current time, used to generate timestamps for various operations. It can be overridden for testing purposes.
+var nowFunc = time.Now
+
+// generateTarCommand generates a tar command string for creating a tarball of a specified backup in a defined destination path.
+func generateTarCommand(volumeName, destinationPath string) string {
+	backupName := fmt.Sprintf(backupTmpl, volumeName, nowFunc().Unix())
 	return fmt.Sprintf(tarCmdTmpl, backupDir, backupName, destinationPath)
+}
+
+// createContainerConfig generates a Docker container configuration object using the specified image and command.
+// The function retrieves the user ID (uid) and group ID (gid) of the executing user, and constructs the configuration
+// to ensure the backup file is created with these IDs.
+func createContainerConfig(image, cmd string) (*container.Config, error) {
+	uid, gid, err := getUserAndGroup()
+	if err != nil {
+		return nil, err
+	}
+	return &container.Config{
+		Image: image,
+		Tty:   false,
+		User:  uid + ":" + gid,
+		Cmd:   []string{"sh", "-c", cmd},
+	}, nil
+}
+
+// getUID is a variable that holds the function os.Getuid, which retrieves the numeric user ID of the caller.
+var getUID = os.Getuid
+
+// getGID holds the function os.Getgid which returns the numeric group ID of the caller.
+var getGID = os.Getgid
+
+// getUserAndGroup retrieves the current user's UID and GID as strings and returns them along with any error encountered.
+func getUserAndGroup() (string, string, error) {
+	uid := strconv.Itoa(getUID())
+	gid := strconv.Itoa(getGID())
+	return uid, gid, nil
 }
