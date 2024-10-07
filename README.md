@@ -12,10 +12,8 @@
 
 ## Usage
 
-1. Install **AeroVault** by cloning the repository or downloading the latest release.
-2. Ensure you have Docker and cloud credentials (AWS, Azure) set up.
-3. Run the following command to back up a Docker volume:
+**Backup Volume**
 
 ```bash
-aero backup --container <container-name> --volume <volume-name> --output <save-path>
+aero backup -c my-container -v my-volume
 ```
