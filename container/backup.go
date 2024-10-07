@@ -5,6 +5,15 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"time"
+)
+
+const (
+	image      = "busybox"
+	backupDir  = "/backup"
+	backupTmpl = "%s-%d"
+	tarCmdTmpl = "tar cvf %s/%s.tar %s"
+	autoRemove = true
 )
 
 // BackupManager handles backup operations such as creating and inspecting container states.
@@ -29,7 +38,9 @@ func (bm *BackupManager) BackupVolume(container, volume, outputPath string) erro
 
 // createBackupContainer creates a backup of the specified volume by creating a Docker container to tar its contents.
 func (bm *BackupManager) createBackupContainer(volumeFrom, volumeName, destinationPath, hostPath string) error {
-	cmd := fmt.Sprintf("tar cvf /backup/%s.tar %s", volumeName, destinationPath)
+	backupName := fmt.Sprintf(backupTmpl, volumeName, time.Now().Unix())
+	cmd := generateTarCommand(backupName, destinationPath)
+
 	config := &container.Config{
 		Image: "busybox",
 		Tty:   false,
@@ -70,4 +81,8 @@ func (bm *BackupManager) getMountPoint(containerName, volumeName string) (types.
 	}
 
 	return types.MountPoint{}, fmt.Errorf("no mount found for volume %s", volumeName)
+}
+
+func generateTarCommand(backupName, destinationPath string) string {
+	return fmt.Sprintf(tarCmdTmpl, backupDir, backupName, destinationPath)
 }
