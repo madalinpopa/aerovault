@@ -2,12 +2,31 @@ package container
 
 import (
 	"context"
+	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
+	"os"
+	"strconv"
 	"testing"
+	"time"
 )
+
+// mockTimeNow function to return a fixed time for testing
+var mockTimeNow = func() time.Time {
+	return time.Unix(1609459200, 0) // Fixed timestamp (January 1, 2021)
+}
+
+// mockUID is a function that returns a mock user ID for testing purposes.
+var mockUID = func() int {
+	return 1001 // Mocked UID
+}
+
+// mockGID is a mock function that always returns a fixed GID value of 1002.
+var mockGID = func() int {
+	return 1002 // Mocked GID
+}
 
 // APIClientStub is a stub implementation of the ContainerManager interface for testing purposes.
 type APIClientStub struct{}
@@ -87,5 +106,52 @@ func TestGetMountPoint_volumeFound(t *testing.T) {
 	}
 	if m.Destination != "/var/www/data" {
 		t.Errorf("expected mount point destination to be '/var/www/data', got %s", m.Destination)
+	}
+}
+
+// TestGenerateTarCommand tests the generateTarCommand function
+func TestGenerateTarCommand(t *testing.T) {
+
+	volumeName := "test_volume"
+	destinationPath := "/tmp/destination"
+
+	expectedBackupName := fmt.Sprintf(backupTmpl, volumeName, mockTimeNow().Unix())
+	expectedCommand := fmt.Sprintf(tarCmdTmpl, backupDir, expectedBackupName, destinationPath)
+
+	nowFunc = mockTimeNow
+	actualCommand := generateTarCommand(volumeName, destinationPath)
+
+	if actualCommand != expectedCommand {
+		t.Errorf("Expected command %s, but got %s", expectedCommand, actualCommand)
+	}
+}
+
+func TestGetUserAndGroup(t *testing.T) {
+	// Override getUID and getGID for the test
+	getUID = mockUID
+	getGID = mockGID
+
+	defer func() {
+		// Restore original behavior after the test
+		getUID = os.Getuid
+		getGID = os.Getgid
+	}()
+
+	// Arrange
+	expectedUID := strconv.Itoa(mockUID())
+	expectedGID := strconv.Itoa(mockGID())
+
+	// Act
+	actualUID, actualGID, err := getUserAndGroup()
+
+	// Assert
+	if err != nil {
+		t.Fatalf("Expected no error, but got %v", err)
+	}
+	if actualUID != expectedUID {
+		t.Errorf("Expected UID %s, but got %s", expectedUID, actualUID)
+	}
+	if actualGID != expectedGID {
+		t.Errorf("Expected GID %s, but got %s", expectedGID, actualGID)
 	}
 }
