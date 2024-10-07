@@ -42,13 +42,13 @@ func (bm *BackupManager) createBackupContainer(volumeFrom, volumeName, destinati
 	cmd := generateTarCommand(backupName, destinationPath)
 
 	config := &container.Config{
-		Image: "busybox",
+		Image: image,
 		Tty:   false,
 		Cmd:   []string{"sh", "-c", cmd},
 	}
 
 	hostConfig := &container.HostConfig{
-		AutoRemove:  true,
+		AutoRemove:  autoRemove,
 		VolumesFrom: []string{volumeFrom},
 		Binds:       []string{fmt.Sprintf("%s:/backup:rw", hostPath)},
 	}
