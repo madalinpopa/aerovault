@@ -1,9 +1,10 @@
 package utils_test
 
 import (
-	"github.com/madalinpopa/aerovault/internal/utils"
 	"os"
 	"testing"
+
+	"github.com/madalinpopa/aerovault/internal/utils"
 )
 
 const (
