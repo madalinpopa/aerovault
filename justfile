@@ -9,7 +9,7 @@ vet: fmt
     go vet ./...
 
 build: vet
-    go build -o aero ./cmd/aero
+    go build -o bin/aero ./cmd/aero
 
 run:
     go run ./cmd/aero
