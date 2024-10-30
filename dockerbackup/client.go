@@ -9,12 +9,14 @@ import (
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-// The Inspector defines methods to inspect the state and details of a container using its container ID.
+// The Inspector defines methods to inspect the state and details of a
+// container using its container ID.
 type Inspector interface {
 	ContainerInspect(ctx context.Context, containerID string) (types.ContainerJSON, error)
 }
 
-// The Creator defines an interface for creating Docker containers with the specified configurations and context.
+// The Creator defines an interface for creating Docker containers with
+// the specified configurations and context.
 type Creator interface {
 	ContainerCreate(ctx context.Context, config *container.Config, hostConfig *container.HostConfig, networkingConfig *network.NetworkingConfig, platform *ocispec.Platform, containerName string) (container.CreateResponse, error)
 }
