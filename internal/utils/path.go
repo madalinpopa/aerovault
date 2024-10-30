@@ -8,7 +8,6 @@ import (
 )
 
 const (
-
 	// errOutputPathNotExist indicates that the specified output path does not exist.
 	errOutputPathNotExist = "output path does not exist"
 
@@ -19,17 +18,12 @@ const (
 	errGettingOutputPathInfo = "error getting output path info: %v"
 )
 
-// isNotExist checks whether an error corresponds to a file or directory not existing.
-func isNotExist(err error) bool {
-	return os.IsNotExist(err)
-}
-
 // ValidateOutputPath checks if the given output directory path is valid, exists, and is a directory.
 // Returns the absolute path if valid, otherwise returns an error.
 func ValidateOutputPath(output string) (string, error) {
 	info, err := os.Stat(output)
 	if err != nil {
-		if isNotExist(err) {
+		if os.IsNotExist(err) {
 			return "", errors.New(errOutputPathNotExist)
 		}
 		return "", fmt.Errorf(errGettingOutputPathInfo, err)
@@ -37,7 +31,11 @@ func ValidateOutputPath(output string) (string, error) {
 	if !info.IsDir() {
 		return "", errors.New(errOutputPathNotDir)
 	}
-	return filepath.Abs(output)
+	absPath, err := filepath.Abs(output)
+	if err != nil {
+		return "", fmt.Errorf("error getting absolute path: %v", err)
+	}
+	return absPath, nil
 }
 
 // GetCurrentDir retrieves and returns the current working directory. Returns an empty string and an error if any occurs.
