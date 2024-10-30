@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -29,12 +30,12 @@ func ValidateOutputPath(output string) (string, error) {
 	info, err := os.Stat(output)
 	if err != nil {
 		if isNotExist(err) {
-			return "", fmt.Errorf(errOutputPathNotExist)
+			return "", errors.New(errOutputPathNotExist)
 		}
 		return "", fmt.Errorf(errGettingOutputPathInfo, err)
 	}
 	if !info.IsDir() {
-		return "", fmt.Errorf(errOutputPathNotDir)
+		return "", errors.New(errOutputPathNotDir)
 	}
 	return filepath.Abs(output)
 }
