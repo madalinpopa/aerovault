@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/docker/docker/client"
-	"github.com/madalinpopa/aerovault/container"
-	"github.com/madalinpopa/aerovault/internal/utils"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
+
+	"github.com/docker/docker/client"
+	"github.com/madalinpopa/aerovault/dockerbackup"
+	"github.com/madalinpopa/aerovault/internal/utils"
+	"github.com/spf13/cobra"
 )
 
 // backupCmd represents the command to create a backup tar file for a given container and its volume.
@@ -61,7 +62,7 @@ func backup(containerName string, volumeName string, outputPath string) error {
 	defer closeDockerClient(cli)
 
 	ctx := context.Background()
-	bm := container.NewBackupManager(cli, ctx)
+	bm := dockerbackup.NewBackupManager(cli, ctx)
 	return bm.BackupVolume(containerName, volumeName, outputPath)
 }
 
