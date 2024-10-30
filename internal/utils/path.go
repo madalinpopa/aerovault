@@ -18,8 +18,8 @@ const (
 	errGettingOutputPathInfo = "error getting output path info: %v"
 )
 
-// ValidateOutputPath checks if the given output directory path is valid, exists, and is a directory.
-// Returns the absolute path if valid, otherwise returns an error.
+// ValidateOutputPath checks if the provided output path exists and is a directory.
+// It returns the absolute path if the validation is successful.
 func ValidateOutputPath(output string) (string, error) {
 	info, err := os.Stat(output)
 	if err != nil {
